@@ -63,7 +63,6 @@ pub struct Clocksource {
 }
 
 const ONE_GHZ: f64 = 1_000_000_000.0;
-const ONE_SECOND: u64 = 1_000_000_000;
 
 #[derive(Clone, PartialEq)]
 pub enum Clock {
@@ -79,16 +78,27 @@ fn read(clock: &Clock) -> u64 {
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-pub fn get_precise_ns() -> u64 {
+fn get_precise_ns() -> u64 {
     unsafe {
         let time = libc::mach_absolute_time();
-        let info = info();
+        let info = {
+            static mut INFO: libc::mach_timebase_info = libc::mach_timebase_info {
+                numer: 0,
+                denom: 0,
+            };
+            static ONCE: std::sync::Once = std::sync::ONCE_INIT;
+
+            ONCE.call_once(|| {
+                libc::mach_timebase_info(&mut INFO);
+            });
+            &INFO
+        };
         time * info.numer as u64 / info.denom as u64
     }
 }
 
 #[cfg(all(not(target_os = "macos"), not(target_os = "ios")))]
-pub fn get_precise_ns() -> u64 {
+fn get_precise_ns() -> u64 {
     let mut ts = libc::timespec {
         tv_sec: 0,
         tv_nsec: 0,
@@ -96,7 +106,7 @@ pub fn get_precise_ns() -> u64 {
     unsafe {
         libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut ts);
     }
-    (ts.tv_sec as u64) * ONE_SECOND + (ts.tv_nsec as u64)
+    (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
 }
 
 #[cfg(feature = "asm")]
