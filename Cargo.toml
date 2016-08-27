@@ -1,0 +1,22 @@
+[package]
+name = "clocksource"
+version = "0.1.0"
+authors = ["Brian Martin <brayniac@gmail.com>"]
+
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+
+homepage = "https://github.com/brayniac/clocksource"
+documentation = "https://brayniac.github.io/clocksource"
+repository = "https://github.com/brayniac/clocksource"
+
+description = "clocksource provides TSC access with transparent fallback to clock_gettime()"
+
+keywords = [ "clock", "time" ]
+
+[dependencies]
+libc = "0.2.15"
+
+[features]
+default = []
+asm = []
