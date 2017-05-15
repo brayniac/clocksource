@@ -82,15 +82,11 @@ fn get_precise_ns() -> u64 {
     unsafe {
         let time = libc::mach_absolute_time();
         let info = {
-            static mut INFO: libc::mach_timebase_info = libc::mach_timebase_info {
-                numer: 0,
-                denom: 0,
-            };
+            static mut INFO: libc::mach_timebase_info =
+                libc::mach_timebase_info { numer: 0, denom: 0 };
             static ONCE: std::sync::Once = std::sync::ONCE_INIT;
 
-            ONCE.call_once(|| {
-                libc::mach_timebase_info(&mut INFO);
-            });
+            ONCE.call_once(|| { libc::mach_timebase_info(&mut INFO); });
             &INFO
         };
         time * info.numer as u64 / info.denom as u64
