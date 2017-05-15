@@ -4,9 +4,12 @@ Clocksource allows access to alternate clocksources like the TSC on your Intel x
 
 Unfortunately, this requires we use nightly rust until the asm!() macro is stabilized. We provide fallback for users on stable rust, this should allow zero-cost abstraction of clock_gettime() for stable builds without benefit of the high-performance timing.
 
+The API documentation of this library can be found at
+[docs.rs/clocksource](https://docs.rs/clocksource/).
+
 ## Getting clocksource
 
-add `clocksource` to your dependencies, read the code, and start using it
+add `clocksource` to your dependencies and start using it
 
 ## Future Work
 
@@ -19,7 +22,6 @@ All contributions are subject to the original LICENSE
 * fork it
 * feature branch
 * improve it
-* rustfmt and clippy please!
 * write a good commit message
 * push to your fork
-* submit a PR
+* open a PR
