@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 
 homepage = "https://github.com/brayniac/clocksource"
-documentation = "https://brayniac.github.io/clocksource"
+documentation = "https://docs.rs/clocksource"
 repository = "https://github.com/brayniac/clocksource"
 
 description = "clocksource provides TSC access with transparent fallback to clock_gettime()"
