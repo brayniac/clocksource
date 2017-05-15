@@ -6,12 +6,14 @@ rust:
 os:
 - linux
 - osx
-after_success: sh scripts/travis-doc-upload.sh
+env: TYPE=default RUST_BACKTRACE=1
 matrix:
   include:
     - os: linux
       rust: nightly
+      env: TYPE=bench RUST_BACKTRACE=1
       script: cargo bench --features asm
     - os: osx
       rust: nightly
+      env: TYPE=bench RUST_BACKTRACE=1
       script: cargo bench --features asm
