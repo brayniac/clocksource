@@ -49,6 +49,7 @@
 //! ```
 
 #![cfg_attr(feature = "asm", feature(asm))]
+#![deny(warnings)]
 
 extern crate libc;
 
