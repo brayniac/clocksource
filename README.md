@@ -7,21 +7,32 @@ Unfortunately, this requires we use nightly rust until the asm!() macro is stabi
 The API documentation of this library can be found at
 [docs.rs/clocksource](https://docs.rs/clocksource/).
 
+[![travis-badge][]][travis] [![downloads-badge][] ![release-badge][]][crate] [![license-badge][]](#license)
+
+[travis-badge]: https://img.shields.io/travis/brayniac/clocksource/master.svg
+[downloads-badge]: https://img.shields.io/crates/d/clocksource.svg
+[release-badge]: https://img.shields.io/crates/v/clocksource.svg
+[license-badge]: https://img.shields.io/crates/l/clocksource.svg
+[travis]: https://travis-ci.org/brayniac/clocksource
+[crate]: https://crates.io/crates/clocksource
+[Cargo]: https://github.com/rust-lang/cargo
+
 ## Getting clocksource
 
 add `clocksource` to your dependencies and start using it
 
-## Future Work
+## License
 
-* Additional platform support
+Licensed under either of
 
-## Contributing
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
-All contributions are subject to the original LICENSE
+at your option.
 
-* fork it
-* feature branch
-* improve it
-* write a good commit message
-* push to your fork
-* open a PR
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in the work by you, as defined in the Apache-2.0
+license, shall be dual licensed as above, without any additional terms or
+conditions.

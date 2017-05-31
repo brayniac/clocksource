@@ -237,7 +237,7 @@ mod tests {
         let cs = Clocksource::default();
         let a = cs.counter();
         let b = cs.counter();
-        assert!(b > a);
+        assert!(b >= a);
     }
 
     #[test]
@@ -245,7 +245,7 @@ mod tests {
         let cs = Clocksource::default();
         let a = cs.reference();
         let b = cs.reference();
-        assert!(b > a);
+        assert!(b >= a);
     }
 
     #[test]
