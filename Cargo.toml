@@ -19,4 +19,5 @@ libc = "0.2.15"
 
 [features]
 default = []
-asm = []
+asm = [ "rdtsc" ]
+rdtsc = []
