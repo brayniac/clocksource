@@ -9,7 +9,7 @@
 //!
 //! # Usage
 //!
-//! Note: You must be on nightly Rust to use the asm feature which
+//! Note: You must be on nightly Rust to use the rdtsc feature which
 //! allows access to the high-speed time stamp counter on `x86_64`
 //!
 //! # Example
@@ -19,7 +19,7 @@
 //! ```
 //! use clocksource::Clocksource;
 //!
-//! // create a `Clocksource` with asm if on nightly
+//! // create a `Clocksource` with rdtsc if on nightly
 //! //   falls-back to clock_gettime() otherwise
 //! let mut clocksource = Clocksource::new();
 //!
@@ -48,7 +48,7 @@
 //! let phase_error = clocksource.phase_error();
 //! ```
 
-#![cfg_attr(feature = "asm", feature(asm))]
+#![cfg_attr(feature = "rdtsc", feature(asm))]
 #![deny(warnings)]
 
 extern crate libc;
@@ -106,7 +106,7 @@ fn get_precise_ns() -> u64 {
     (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
 }
 
-#[cfg(feature = "asm")]
+#[cfg(feature = "rdtsc")]
 #[allow(unused_mut)]
 fn rdtsc() -> u64 {
     let mut l: u32;
@@ -117,14 +117,14 @@ fn rdtsc() -> u64 {
     ((m as u64) << 32) | (l as u64)
 }
 
-#[cfg(not(feature = "asm"))]
+#[cfg(not(feature = "rdtsc"))]
 fn rdtsc() -> u64 {
-    panic!("Clock::Counter requires 'asm' feature");
+    panic!("Clock::Counter requires 'rdtsc' feature");
 }
 
 impl Default for Clocksource {
     fn default() -> Clocksource {
-        if cfg!(feature = "asm") {
+        if cfg!(feature = "rdtsc") {
             Clocksource::configured(Clock::Monotonic, Clock::Counter)
         } else {
             Clocksource::configured(Clock::Monotonic, Clock::Monotonic)
