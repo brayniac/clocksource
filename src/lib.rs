@@ -101,7 +101,7 @@ fn get_precise_ns() -> u64 {
         tv_nsec: 0,
     };
     unsafe {
-        libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut ts);
+        libc::clock_gettime(libc::CLOCK_REALTIME, &mut ts);
     }
     (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
 }
