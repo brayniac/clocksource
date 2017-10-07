@@ -65,17 +65,31 @@ pub struct Clocksource {
 
 const ONE_GHZ: f64 = 1_000_000_000.0;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Clock {
     Monotonic,
+    Realtime,
     Counter,
 }
 
 fn read(clock: &Clock) -> u64 {
     match *clock {
         Clock::Monotonic => get_precise_ns(),
+        Clock::Realtime => get_unix_time(),
         Clock::Counter => rdtsc(),
     }
+}
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+fn get_unix_time() -> u64 {
+    let mut ts = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    unsafe {
+        libc::clock_gettime(libc::CLOCK_REALTIME, &mut ts);
+    }
+    (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
 }
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -95,13 +109,25 @@ fn get_precise_ns() -> u64 {
 }
 
 #[cfg(all(not(target_os = "macos"), not(target_os = "ios")))]
-fn get_precise_ns() -> u64 {
+fn get_unix_time() -> u64 {
     let mut ts = libc::timespec {
         tv_sec: 0,
         tv_nsec: 0,
     };
     unsafe {
         libc::clock_gettime(libc::CLOCK_REALTIME, &mut ts);
+    }
+    (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
+}
+
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios")))]
+fn get_precise_ns() -> u64 {
+    let mut ts = libc::timespec {
+        tv_sec: 0,
+        tv_nsec: 0,
+    };
+    unsafe {
+        libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut ts);
     }
     (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
 }
