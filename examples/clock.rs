@@ -42,37 +42,37 @@ fn test_clock(reference: Clock, source: Clock) {
     println!("Stability:");
     if let Some(t) = allan.get(1) {
         if let Some(adev) = t.deviation() {
-        	let tdev = (1.0f64 / (3.0f64).powf(0.5)) * adev;
+            let tdev = (1.0f64 / (3.0f64).powf(0.5)) * adev;
             println!("     TDEV(1mS): {:.3e}", tdev);
         }
     }
     if let Some(t) = allan.get(10) {
         if let Some(adev) = t.deviation() {
-        	let tdev = (10.0f64 / (3.0f64).powf(0.5)) * adev;
+            let tdev = (10.0f64 / (3.0f64).powf(0.5)) * adev;
             println!("    TDEV(10mS): {:.3e}", tdev);
         }
     }
     if let Some(t) = allan.get(100) {
         if let Some(adev) = t.deviation() {
-        	let tdev = (100.0f64 / (3.0f64).powf(0.5)) * adev;
+            let tdev = (100.0f64 / (3.0f64).powf(0.5)) * adev;
             println!("   TDEV(100mS): {:.3e}", tdev);
         }
     }
     if let Some(t) = allan.get(1_000) {
         if let Some(adev) = t.deviation() {
-        	let tdev = (1_000.0f64 / (3.0f64).powf(0.5)) * adev;
+            let tdev = (1_000.0f64 / (3.0f64).powf(0.5)) * adev;
             println!("      TDEV(1S): {:.3e}", tdev);
         }
     }
     if let Some(t) = allan.get(10_000) {
         if let Some(adev) = t.deviation() {
-        	let tdev = (10_000.0f64 / (3.0f64).powf(0.5)) * adev;
+            let tdev = (10_000.0f64 / (3.0f64).powf(0.5)) * adev;
             println!("     TDEV(10S): {:.3e}", tdev);
         }
     }
     if let Some(t) = allan.get(100_000) {
         if let Some(adev) = t.deviation() {
-        	let tdev = (100_000.0f64 / (3.0f64).powf(0.5)) * adev;
+            let tdev = (100_000.0f64 / (3.0f64).powf(0.5)) * adev;
             println!("    TDEV(100S): {:.3e}", tdev);
         }
     }
