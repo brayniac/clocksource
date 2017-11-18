@@ -15,8 +15,10 @@ description = "clocksource provides TSC access with transparent fallback to cloc
 keywords = [ "clock", "time" ]
 
 [dependencies]
-allan = "*"
 libc = "0.2.15"
+
+[dev-dependencies]
+allan = "0.2.3"
 
 [features]
 default = []
