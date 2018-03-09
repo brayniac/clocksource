@@ -230,8 +230,8 @@ impl Clocksource {
         let ref_t1 = self.reference();
         let src_t1 = self.counter();
 
-        let ref_d = ref_t1 - self.ref_t0;
-        let src_d = src_t1 - self.src_t0;
+        let ref_d = ref_t1.wrapping_sub(self.ref_t0);
+        let src_d = src_t1.wrapping_sub(self.src_t0);
 
         self.src_hz = src_d as f64 * self.ref_hz / ref_d as f64;
     }
@@ -250,7 +250,7 @@ impl Clocksource {
 
     /// converts a raw reading to approximation of reference in nanoseconds
     pub fn convert(&self, src_t1: u64) -> f64 {
-        (self.ref_hz * ((src_t1 - self.src_t0) as f64 / self.src_hz)) + self.ref_t0 as f64
+        (self.ref_hz * (src_t1.wrapping_sub(self.src_t0) as f64 / self.src_hz)) + self.ref_t0 as f64
     }
 }
 
