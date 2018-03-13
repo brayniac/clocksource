@@ -132,21 +132,24 @@ fn get_unix_time() -> u64 {
 fn get_precise_ns() -> u64 {
     use std::mem;
     use winapi::um::winnt::LARGE_INTEGER;
+    use winapi::um::profileapi;
     lazy_static! {
         static ref PRF_FREQUENCY: u64 = {
             unsafe {
                 let mut frq: LARGE_INTEGER = mem::uninitialized();
-                let res = winapi::um::profileapi::QueryPerformanceFrequency(&mut frq as *mut LARGE_INTEGER);
+                let res = profileapi::QueryPerformanceFrequency(&mut frq as *mut LARGE_INTEGER);
                 if res == 0 {
                     panic!("Failed to query performance frequency, result: {}", res)
                 }
-                *frq.QuadPart() as u64
+                let frq = *frq.QuadPart() as u64;
+                println!("frq {}", frq);
+                frq
             }
         };
     }
     let cnt = unsafe {
         let mut cnt: LARGE_INTEGER = mem::uninitialized();
-        let res = winapi::um::profileapi::QueryPerformanceCounter(&mut cnt as *mut LARGE_INTEGER);
+        let res = profileapi::QueryPerformanceCounter(&mut cnt as *mut LARGE_INTEGER);
         if res == 0 {
             panic!("Failed to query performance counter, res: {}", res)
         }
@@ -154,7 +157,7 @@ fn get_precise_ns() -> u64 {
     };
 
 
-    let cnt = cnt as f32 * 1_000_000_000_f32 / *PRF_FREQUENCY as f32;
+    let cnt = cnt as f64 / (*PRF_FREQUENCY as f64 / 1_000_000_000_f64);
     println!("get precise nanos {}", cnt);
     return cnt as u64;
 }
