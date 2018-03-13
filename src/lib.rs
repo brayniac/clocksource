@@ -51,10 +51,11 @@
 #![cfg_attr(feature = "rdtsc", feature(asm))]
 #![deny(warnings)]
 
+extern crate libc;
 #[cfg(target_os = "windows")]
 #[macro_use]
 extern crate lazy_static;
-extern crate libc;
+#[cfg(target_os = "windows")]
 extern crate winapi;
 
 #[derive(Clone)]
@@ -142,7 +143,6 @@ fn get_precise_ns() -> u64 {
                     panic!("Failed to query performance frequency, result: {}", res)
                 }
                 let frq = *frq.QuadPart() as u64;
-                println!("frq {}", frq);
                 frq
             }
         };
@@ -158,7 +158,6 @@ fn get_precise_ns() -> u64 {
 
 
     let cnt = cnt as f64 / (*PRF_FREQUENCY as f64 / 1_000_000_000_f64);
-    println!("get precise nanos {}", cnt);
     return cnt as u64;
 }
 
