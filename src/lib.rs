@@ -117,16 +117,15 @@ fn get_precise_ns() -> u64 {
 fn get_unix_time() -> u64 {
     use std::mem;
     use winapi::um::sysinfoapi;
-    use winapi::shared::minwindef::{FILETIME, LPFILETIME};
-    println!("get unix");
-    let mut file_time: i64 = unsafe {
-        let mut file_time: FILETIME = mem::zeroed();
-        sysinfoapi::GetSystemTimePreciseAsFileTime(&mut file_time as LPFILETIME);
-        mem::transmute(file_time)
+    use winapi::shared::minwindef::{FILETIME};
+    const OFFSET: u64 = 116_444_736_000_000_000; //1jan1601 to 1jan1970
+    let mut file_time = unsafe {
+        let mut file_time: FILETIME = mem::uninitialized();
+        sysinfoapi::GetSystemTimePreciseAsFileTime(&mut file_time);
+        (mem::transmute::<FILETIME,i64>(file_time)) as u64
     };
-    const OFFSET: i64 = 116_444_736_000_000_000i64; //1jan1601 to 1jan1970
     file_time -= OFFSET;
-    (file_time / 10_000_000_000i64) as u64
+    file_time * 100
 }
 
 #[cfg(target_os = "windows")]
@@ -138,10 +137,8 @@ fn get_precise_ns() -> u64 {
         static ref PRF_FREQUENCY: u64 = {
             unsafe {
                 let mut frq: LARGE_INTEGER = mem::uninitialized();
-                let res = profileapi::QueryPerformanceFrequency(&mut frq as *mut LARGE_INTEGER);
-                if res == 0 {
-                    panic!("Failed to query performance frequency, result: {}", res)
-                }
+                let res = profileapi::QueryPerformanceFrequency(&mut frq);
+                debug_assert_ne!(res, 0, "Failed to query performance frequency, {}", res);
                 let frq = *frq.QuadPart() as u64;
                 frq
             }
@@ -149,16 +146,14 @@ fn get_precise_ns() -> u64 {
     }
     let cnt = unsafe {
         let mut cnt: LARGE_INTEGER = mem::uninitialized();
-        let res = profileapi::QueryPerformanceCounter(&mut cnt as *mut LARGE_INTEGER);
-        if res == 0 {
-            panic!("Failed to query performance counter, res: {}", res)
-        }
+        debug_assert_eq!(mem::align_of::<LARGE_INTEGER>(), 8);
+        let res = profileapi::QueryPerformanceCounter(&mut cnt);
+        debug_assert_ne!(res, 0, "Failed to query performance counter {}", res);
         *cnt.QuadPart() as u64
     };
 
-
     let cnt = cnt as f64 / (*PRF_FREQUENCY as f64 / 1_000_000_000_f64);
-    return cnt as u64;
+    cnt as u64
 }
 
 #[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows")))]
