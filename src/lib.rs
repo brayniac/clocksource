@@ -120,7 +120,7 @@ fn get_unix_time() -> u64 {
     use winapi::shared::minwindef::{FILETIME};
     const OFFSET: u64 = 116_444_736_000_000_000; //1jan1601 to 1jan1970
     let mut file_time = unsafe {
-        let mut file_time: FILETIME = mem::uninitialized();
+        let mut file_time = mem::uninitialized();
         sysinfoapi::GetSystemTimePreciseAsFileTime(&mut file_time);
         (mem::transmute::<FILETIME,i64>(file_time)) as u64
     };
@@ -136,7 +136,7 @@ fn get_precise_ns() -> u64 {
     lazy_static! {
         static ref PRF_FREQUENCY: u64 = {
             unsafe {
-                let mut frq: LARGE_INTEGER = mem::uninitialized();
+                let mut frq = mem::uninitialized();
                 let res = profileapi::QueryPerformanceFrequency(&mut frq);
                 debug_assert_ne!(res, 0, "Failed to query performance frequency, {}", res);
                 let frq = *frq.QuadPart() as u64;
@@ -145,7 +145,7 @@ fn get_precise_ns() -> u64 {
         };
     }
     let cnt = unsafe {
-        let mut cnt: LARGE_INTEGER = mem::uninitialized();
+        let mut cnt = mem::uninitialized();
         debug_assert_eq!(mem::align_of::<LARGE_INTEGER>(), 8);
         let res = profileapi::QueryPerformanceCounter(&mut cnt);
         debug_assert_ne!(res, 0, "Failed to query performance counter {}", res);
