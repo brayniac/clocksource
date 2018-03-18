@@ -17,6 +17,10 @@ keywords = [ "clock", "time" ]
 [dependencies]
 libc = "0.2.15"
 
+[target.'cfg(windows)'.dependencies]
+lazy_static = "1.0"
+winapi = { version = "0.3.4", features = ["profileapi", "sysinfoapi"] }
+
 [dev-dependencies]
 allan = "0.2.3"
 

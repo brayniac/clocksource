@@ -52,6 +52,11 @@
 #![deny(warnings)]
 
 extern crate libc;
+#[cfg(target_os = "windows")]
+#[macro_use]
+extern crate lazy_static;
+#[cfg(target_os = "windows")]
+extern crate winapi;
 
 #[derive(Clone)]
 pub struct Clocksource {
@@ -108,7 +113,50 @@ fn get_precise_ns() -> u64 {
     }
 }
 
-#[cfg(all(not(target_os = "macos"), not(target_os = "ios")))]
+#[cfg(target_os = "windows")]
+fn get_unix_time() -> u64 {
+    use std::mem;
+    use winapi::um::sysinfoapi;
+    use winapi::shared::minwindef::{FILETIME};
+    const OFFSET: u64 = 116_444_736_000_000_000; //1jan1601 to 1jan1970
+    let mut file_time = unsafe {
+        let mut file_time = mem::uninitialized();
+        sysinfoapi::GetSystemTimePreciseAsFileTime(&mut file_time);
+        (mem::transmute::<FILETIME,i64>(file_time)) as u64
+    };
+    file_time -= OFFSET;
+    file_time * 100
+}
+
+#[cfg(target_os = "windows")]
+fn get_precise_ns() -> u64 {
+    use std::mem;
+    use winapi::um::winnt::LARGE_INTEGER;
+    use winapi::um::profileapi;
+    lazy_static! {
+        static ref PRF_FREQUENCY: u64 = {
+            unsafe {
+                let mut frq = mem::uninitialized();
+                let res = profileapi::QueryPerformanceFrequency(&mut frq);
+                debug_assert_ne!(res, 0, "Failed to query performance frequency, {}", res);
+                let frq = *frq.QuadPart() as u64;
+                frq
+            }
+        };
+    }
+    let cnt = unsafe {
+        let mut cnt = mem::uninitialized();
+        debug_assert_eq!(mem::align_of::<LARGE_INTEGER>(), 8);
+        let res = profileapi::QueryPerformanceCounter(&mut cnt);
+        debug_assert_ne!(res, 0, "Failed to query performance counter {}", res);
+        *cnt.QuadPart() as u64
+    };
+
+    let cnt = cnt as f64 / (*PRF_FREQUENCY as f64 / 1_000_000_000_f64);
+    cnt as u64
+}
+
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows")))]
 fn get_unix_time() -> u64 {
     let mut ts = libc::timespec {
         tv_sec: 0,
@@ -120,7 +168,7 @@ fn get_unix_time() -> u64 {
     (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
 }
 
-#[cfg(all(not(target_os = "macos"), not(target_os = "ios")))]
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows")))]
 fn get_precise_ns() -> u64 {
     let mut ts = libc::timespec {
         tv_sec: 0,
