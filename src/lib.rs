@@ -117,12 +117,12 @@ fn get_precise_ns() -> u64 {
 fn get_unix_time() -> u64 {
     use std::mem;
     use winapi::um::sysinfoapi;
-    use winapi::shared::minwindef::{FILETIME};
+    use winapi::shared::minwindef::FILETIME;
     const OFFSET: u64 = 116_444_736_000_000_000; //1jan1601 to 1jan1970
     let mut file_time = unsafe {
         let mut file_time = mem::uninitialized();
         sysinfoapi::GetSystemTimePreciseAsFileTime(&mut file_time);
-        (mem::transmute::<FILETIME,i64>(file_time)) as u64
+        (mem::transmute::<FILETIME, i64>(file_time)) as u64
     };
     file_time -= OFFSET;
     file_time * 100
