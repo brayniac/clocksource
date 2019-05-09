@@ -117,12 +117,12 @@ fn get_precise_ns() -> u64 {
 fn get_unix_time() -> u64 {
     use std::mem;
     use winapi::um::sysinfoapi;
-    use winapi::shared::minwindef::{FILETIME};
+    use winapi::shared::minwindef::FILETIME;
     const OFFSET: u64 = 116_444_736_000_000_000; //1jan1601 to 1jan1970
     let mut file_time = unsafe {
         let mut file_time = mem::uninitialized();
         sysinfoapi::GetSystemTimePreciseAsFileTime(&mut file_time);
-        (mem::transmute::<FILETIME,i64>(file_time)) as u64
+        (mem::transmute::<FILETIME, i64>(file_time)) as u64
     };
     file_time -= OFFSET;
     file_time * 100
@@ -156,7 +156,7 @@ fn get_precise_ns() -> u64 {
     cnt as u64
 }
 
-#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows")))]
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), unix))]
 fn get_unix_time() -> u64 {
     let mut ts = libc::timespec {
         tv_sec: 0,
@@ -168,7 +168,7 @@ fn get_unix_time() -> u64 {
     (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
 }
 
-#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows")))]
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), unix))]
 fn get_precise_ns() -> u64 {
     let mut ts = libc::timespec {
         tv_sec: 0,
@@ -178,6 +178,30 @@ fn get_precise_ns() -> u64 {
         libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut ts);
     }
     (ts.tv_sec as u64) * 1_000_000_000 + (ts.tv_nsec as u64)
+}
+
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows"), not(unix)))]
+#[macro_use]
+extern crate lazy_static;
+
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows"), not(unix)))]
+fn get_unix_time() -> u64 {
+    use std::time::SystemTime;
+    match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+        Ok(n) => n.as_nanos() as u64,
+        Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+    }
+}
+
+#[cfg(all(not(target_os = "macos"), not(target_os = "ios"), not(target_os = "windows"), not(unix)))]
+fn get_precise_ns() -> u64 {
+    use std::time::Instant;
+    lazy_static! {
+        static ref START: Instant = {
+            Instant::now()
+        };
+    }
+    START.elapsed().as_nanos() as u64
 }
 
 #[cfg(feature = "rdtsc")]
