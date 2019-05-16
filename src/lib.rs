@@ -322,7 +322,11 @@ impl Clocksource {
 
     /// converts a raw reading to approximation of reference in nanoseconds
     pub fn convert(&self, src_t1: u64) -> f64 {
-        (self.ref_hz * (src_t1.wrapping_sub(self.src_t0) as f64 / self.src_hz)) + self.ref_t0 as f64
+        if self.src_id != self.ref_id {
+            (self.ref_hz * ((src_t1 - self.src_t0) as f64 / self.src_hz)) + self.ref_t0 as f64
+        } else {
+            src_t1 as f64
+        }
     }
 }
 
