@@ -58,6 +58,9 @@ extern crate lazy_static;
 #[cfg(target_os = "windows")]
 extern crate winapi;
 
+#[cfg(any(target_os = "macos", target_os = "ops"))]
+extern crate mach;
+
 #[derive(Clone)]
 pub struct Clocksource {
     ref_id: Clock,
@@ -99,14 +102,14 @@ fn get_unix_time() -> u64 {
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 fn get_precise_ns() -> u64 {
+    use mach::mach_time::{mach_absolute_time, mach_timebase_info};
     unsafe {
-        let time = libc::mach_absolute_time();
+        let time = mach_absolute_time();
         let info = {
-            static mut INFO: libc::mach_timebase_info =
-                libc::mach_timebase_info { numer: 0, denom: 0 };
+            static mut INFO: mach_timebase_info = mach_timebase_info { numer: 0, denom: 0 };
             static ONCE: std::sync::Once = std::sync::ONCE_INIT;
 
-            ONCE.call_once(|| { libc::mach_timebase_info(&mut INFO); });
+            ONCE.call_once(|| { mach_timebase_info(&mut INFO); });
             &INFO
         };
         time * info.numer as u64 / info.denom as u64
