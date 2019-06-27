@@ -48,7 +48,6 @@
 //! let phase_error = clocksource.phase_error();
 //! ```
 
-#![cfg_attr(feature = "rdtsc", feature(asm))]
 #![deny(warnings)]
 
 extern crate libc;
@@ -207,15 +206,14 @@ fn get_precise_ns() -> u64 {
     START.elapsed().as_nanos() as u64
 }
 
-#[cfg(feature = "rdtsc")]
-#[allow(unused_mut)]
+#[cfg(all(feature = "rdtsc", target_arch = "x86_64"))]
 fn rdtsc() -> u64 {
-    let mut l: u32;
-    let mut m: u32;
-    unsafe {
-        asm!("lfence; rdtsc" : "={eax}" (l), "={edx}" (m) ::: "volatile");
-    }
-    ((m as u64) << 32) | (l as u64)
+    unsafe { core::arch::x86_64::_rdtsc() }
+}
+
+#[cfg(all(feature = "rdtsc", not(target_arch = "x86_64")))]
+fn rdtsc() -> u64 {
+    panic!("Clock::Counter requires 'x86_64' arch");
 }
 
 #[cfg(not(feature = "rdtsc"))]
